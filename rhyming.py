@@ -1,4 +1,7 @@
-""" asdf"""
+"""
+Helper functions for finding rhymes
+"""
+import logging
 import random
 import requests
 
@@ -6,6 +9,7 @@ SYLLABLE_TARGET = 3
 API_BASE = "https://api.datamuse.com/words"
 
 CACHED_RHYMES = {}
+
 
 def pos_filter(word, part_of_speech):
     """ Filter by part of speech """
@@ -49,7 +53,7 @@ def find_rhyme(syllables, base, attempts=10):
             base_words.remove(word)
 
     chosen_base_word = random.choice(base_words)
-    print(chosen_base_word)
+    logging.debug(chosen_base_word)
 
     # Figure out remaining syllables. If none, we're done.
     syl_left = syllables - chosen_base_word["numSyllables"]
@@ -60,13 +64,9 @@ def find_rhyme(syllables, base, attempts=10):
     adj_list = [word for word in adj_list if syl_filter(word, syl_left, syl_left)]
 
     if not adj_list:
-        print(f"No matching adjatives for {chosen_base_word['word']}. Retrying ({attempts} more)")
+        logging.warning("No matching adjatives for %s. Retrying (%d more)", chosen_base_word["word"], attempts)
         return find_rhyme(syllables, base, attempts - 1)
 
     chosen_adj = adj_list[0]
 
     return chosen_adj["word"] + " " + chosen_base_word["word"]
-
-rhyme = find_rhyme(3, "bar")
-jingle = f"🎶 Break me off a piece of that {rhyme} 🎶"
-print(jingle)
